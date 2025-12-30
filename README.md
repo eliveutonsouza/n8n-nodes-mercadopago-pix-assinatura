@@ -1,5 +1,8 @@
 # n8n-nodes-mercadopago-pix-assinatura
 
+[![npm version](https://img.shields.io/npm/v/n8n-nodes-mercadopago-pix-assinatura.svg)](https://www.npmjs.com/package/n8n-nodes-mercadopago-pix-assinatura)
+[![npm downloads](https://img.shields.io/npm/dm/n8n-nodes-mercadopago-pix-assinatura.svg)](https://www.npmjs.com/package/n8n-nodes-mercadopago-pix-assinatura)
+
 Node customizado do n8n para processamento de pagamentos via Mercado Pago, com suporte completo a:
 
 - 💰 **Pagamentos PIX** (criação, consulta, reembolso)
@@ -276,7 +279,10 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE para d
 
 ## 👤 Autor
 
-Seu Nome - seu.email@example.com
+Eliveuton Souza - eliveuton3m@hotmail.com
+
+**GitHub**: [@eliveutonsouza](https://github.com/eliveutonsouza)  
+**NPM**: [n8n-nodes-mercadopago-pix-assinatura](https://www.npmjs.com/package/n8n-nodes-mercadopago-pix-assinatura)
 
 ## 🙏 Agradecimentos
 
