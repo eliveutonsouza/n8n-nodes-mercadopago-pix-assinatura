@@ -1,0 +1,49 @@
+# Source files
+nodes/
+credentials/
+test/
+
+# Development files
+*.ts
+!*.d.ts
+tsconfig.json
+jest.config.js
+gulpfile.js
+
+# Testing
+coverage/
+.nyc_output/
+
+# Development dependencies
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation (opcional - pode manter README.md)
+# TEST_RESULTS.md
+

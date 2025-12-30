@@ -38,7 +38,27 @@ npm run build
 npm run dev
 ```
 
-### Instalação no n8n
+### Instalação no n8n Self-Hosted (via NPM)
+
+**Recomendado**: Instale via npm para facilitar atualizações.
+
+1. No diretório do seu n8n self-hosted, instale o pacote:
+```bash
+npm install n8n-nodes-mercadopago-pix-assinatura
+```
+
+2. Reinicie o n8n:
+```bash
+# Se estiver usando Docker
+docker restart n8n
+
+# Se estiver usando npm diretamente
+# Reinicie o processo do n8n
+```
+
+3. O node aparecerá na lista de nodes disponíveis no n8n
+
+### Instalação Manual no n8n
 
 1. Copie a pasta `dist` para o diretório de nodes customizados do n8n
 2. Reinicie o n8n

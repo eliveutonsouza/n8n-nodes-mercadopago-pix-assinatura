@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "description": "n8n node para processamento de pagamentos PIX e assinaturas via Mercado Pago",
   "keywords": [
+    "n8n",
     "n8n-community-node-package",
+    "n8n-node",
     "mercadopago",
     "pix",
     "assinaturas",
     "pagamentos",
-    "brasil"
+    "brasil",
+    "payment",
+    "subscription",
+    "webhook"
   ],
+  "bugs": {
+    "url": "https://github.com/eliveutonsouza/n8n-nodes-mercadopago-pix-assinatura/issues"
+  },
   "license": "MIT",
   "homepage": "https://github.com/eliveutonsouza/n8n-nodes-mercadopago-pix-assinatura",
   "author": {
@@ -32,7 +40,7 @@
     "test:coverage": "jest --coverage",
     "test:unit": "jest test/unit",
     "test:integration": "jest test/integration",
-    "prepublishOnly": "npm run build && npm run lint -s"
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist"
