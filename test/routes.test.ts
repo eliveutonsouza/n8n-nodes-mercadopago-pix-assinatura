@@ -21,16 +21,16 @@ describe('Validação de Rotas do Mercado Pago', () => {
 			expect(node.description.credentials?.[0].name).toBe('pixPaymentApi');
 		});
 
-		it('deve ter recursos definidos', () => {
-			const resourceProperty = node.description.properties?.find(
-				(p) => p.name === 'resource',
-			);
-			expect(resourceProperty).toBeDefined();
-			expect(resourceProperty?.options).toBeDefined();
-			if (resourceProperty?.options) {
-				expect((resourceProperty.options as any)?.length).toBe(4);
-			}
-		});
+        it('deve ter recursos definidos', () => {
+          const resourceProperty = node.description.properties?.find(
+            (p) => p.name === 'resource',
+          );
+          expect(resourceProperty).toBeDefined();
+          expect(resourceProperty?.options).toBeDefined();
+          if (resourceProperty?.options) {
+            expect((resourceProperty.options as any)?.length).toBe(5);
+          }
+        });
 	});
 
 	describe('Recurso PIX', () => {
@@ -65,7 +65,33 @@ describe('Validação de Rotas do Mercado Pago', () => {
 		});
 	});
 
-	describe('Recurso Assinaturas', () => {
+      describe('Recurso Planos', () => {
+        it('deve ter operações: create, get, list, update', () => {
+          const planOperations = ['create', 'get', 'list', 'update'];
+          const operationProperty = node.description.properties?.find(
+            (p) =>
+              p.name === 'operation' &&
+              p.displayOptions?.show?.resource?.includes('plans'),
+          );
+
+          expect(operationProperty).toBeDefined();
+
+          if (operationProperty?.options) {
+            const operations = operationProperty.options
+              .filter((opt: any) => {
+                const displayOptions = opt.displayOptions || operationProperty.displayOptions;
+                return displayOptions?.show?.resource?.includes('plans');
+              })
+              .map((opt: any) => opt.value);
+            
+            planOperations.forEach((op) => {
+              expect(operations).toContain(op);
+            });
+          }
+        });
+      });
+
+      describe('Recurso Assinaturas', () => {
 		it('deve ter operações: create, pause, resume, cancel, get, list', () => {
 			const subscriptionOperations = ['create', 'pause', 'resume', 'cancel', 'get', 'list'];
 			const operationProperty = node.description.properties?.find(

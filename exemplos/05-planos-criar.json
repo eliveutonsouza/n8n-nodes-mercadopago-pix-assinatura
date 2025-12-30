@@ -1,9 +1,9 @@
 {
-  "name": "Mercado Pago - Criar Assinatura",
+  "name": "Mercado Pago - Criar Plano",
   "nodes": [
     {
       "parameters": {},
-      "id": "manual-trigger-subscription",
+      "id": "manual-trigger-plan",
       "name": "Quando clicar em 'Testar'",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -11,16 +11,15 @@
     },
     {
       "parameters": {
-        "resource": "subscriptions",
+        "resource": "plans",
         "operation": "create",
-        "planId": "PLAN_123456",
-        "payerEmail": "cliente@exemplo.com",
-        "payerDocument": "12345678909",
-        "startDate": "={{ $now.toISO() }}",
-        "trialPeriodDays": 7
+        "reason": "Plano Mensal Premium",
+        "amount": 99.99,
+        "frequency": 1,
+        "frequencyType": "months"
       },
-      "id": "mercado-pago-subscription",
-      "name": "Mercado Pago Assinatura",
+      "id": "mercado-pago-plan",
+      "name": "Mercado Pago Plano",
       "type": "n8n-nodes-mercadopago-pix-assinatura.pixPayment",
       "typeVersion": 1,
       "position": [450, 300],
@@ -36,8 +35,8 @@
         "assignments": {
           "assignments": [
             {
-              "id": "subscription-id",
-              "name": "subscriptionId",
+              "id": "plan-id",
+              "name": "planId",
               "value": "={{ $json.id }}",
               "type": "string"
             },
@@ -48,15 +47,27 @@
               "type": "string"
             },
             {
-              "id": "payer-email",
-              "name": "payerEmail",
-              "value": "={{ $json.payerEmail }}",
+              "id": "reason",
+              "name": "reason",
+              "value": "={{ $json.description }}",
               "type": "string"
             },
             {
-              "id": "init-point",
-              "name": "initPoint",
-              "value": "={{ $json.raw.init_point || $json.raw.sandbox_init_point }}",
+              "id": "amount",
+              "name": "amount",
+              "value": "={{ $json.amount }}",
+              "type": "number"
+            },
+            {
+              "id": "frequency",
+              "name": "frequency",
+              "value": "={{ $json.raw.auto_recurring.frequency }}",
+              "type": "number"
+            },
+            {
+              "id": "frequency-type",
+              "name": "frequencyType",
+              "value": "={{ $json.raw.auto_recurring.frequency_type }}",
               "type": "string"
             }
           ]
@@ -75,14 +86,14 @@
       "main": [
         [
           {
-            "node": "Mercado Pago Assinatura",
+            "node": "Mercado Pago Plano",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Mercado Pago Assinatura": {
+    "Mercado Pago Plano": {
       "main": [
         [
           {
@@ -104,3 +115,4 @@
   "updatedAt": "2024-12-30T00:00:00.000Z",
   "versionId": "1"
 }
+

@@ -34,6 +34,13 @@ export const mockWebhookData = {
 	description: 'Webhook de teste',
 };
 
+export const mockPlanData = {
+	reason: 'Plano Mensal Premium',
+	amount: 99.99,
+	frequency: 1,
+	frequencyType: 'months',
+};
+
 export const validCPF = '12345678901';
 export const validCNPJ = '12345678000190';
 export const invalidDocument = '123';

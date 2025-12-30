@@ -2,7 +2,7 @@
  * Mocks das respostas da API do Mercado Pago
  */
 
-import { Payment, Subscription, Webhook } from '../../nodes/PixPayment/types';
+import { Payment, Plan, Subscription, Webhook } from '../../nodes/PixPayment/types';
 
 export const mockPixPaymentResponse: Payment = {
 	id: '123456789',
@@ -106,5 +106,31 @@ export const mockRefundResponse = {
 	amount: 1050,
 	status: 'approved',
 	date_created: '2024-01-01T12:10:00.000Z',
+};
+
+export const mockPlanResponse: Plan = {
+	id: 'PLAN_123456',
+	status: 'active',
+	reason: 'Plano Mensal Premium',
+	auto_recurring: {
+		frequency: 1,
+		frequency_type: 'months',
+		transaction_amount: 9999,
+		currency_id: 'BRL',
+	},
+	payment_methods_allowed: {
+		payment_types: [{ id: 'credit_card' }],
+	},
+	date_created: new Date().toISOString(),
+	last_modified: new Date().toISOString(),
+};
+
+export const mockPlanListResponse = {
+	results: [mockPlanResponse],
+	paging: {
+		total: 1,
+		offset: 0,
+		limit: 10,
+	},
 };
 

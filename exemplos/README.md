@@ -4,7 +4,25 @@ Esta pasta contém exemplos de workflows prontos para importar no n8n, demonstra
 
 ## 📋 Workflows Disponíveis
 
-### 1. PIX - Criar Pagamento
+### 1. Planos - Criar Plano
+**Arquivo**: `05-planos-criar.json`
+
+Workflow para criar um plano de assinatura no Mercado Pago.
+
+**Funcionalidades:**
+- Cria plano com nome, valor, frequência e tipo de frequência
+- Formata resposta com ID do plano e informações
+- O ID retornado pode ser usado para criar assinaturas
+
+**Campos configurados:**
+- Nome: "Plano Mensal Premium"
+- Valor: R$ 99,99
+- Frequência: 1 (mensal)
+- Tipo: months
+
+---
+
+### 2. PIX - Criar Pagamento
 **Arquivo**: `01-pix-criar-pagamento.json`
 
 Workflow completo para criar um pagamento PIX com todos os campos preenchidos.
@@ -25,7 +43,7 @@ Workflow completo para criar um pagamento PIX com todos os campos preenchidos.
 
 ---
 
-### 2. Assinaturas - Criar Assinatura
+### 3. Assinaturas - Criar Assinatura
 **Arquivo**: `02-assinaturas-criar.json`
 
 Workflow para criar uma nova assinatura baseada em um plano existente.
@@ -45,7 +63,7 @@ Workflow para criar uma nova assinatura baseada em um plano existente.
 
 ---
 
-### 3. Pagamentos Recorrentes - Criar
+### 4. Pagamentos Recorrentes - Criar
 **Arquivo**: `03-pagamentos-recorrentes-criar.json`
 
 Workflow para criar um pagamento recorrente.
@@ -61,7 +79,7 @@ Workflow para criar um pagamento recorrente.
 
 ---
 
-### 4. Webhooks - Registrar
+### 5. Webhooks - Registrar
 **Arquivo**: `04-webhooks-registrar.json`
 
 Workflow para registrar um novo webhook para receber notificações.

@@ -6,6 +6,7 @@
 Node customizado do n8n para processamento de pagamentos via Mercado Pago, com suporte completo a:
 
 - 💰 **Pagamentos PIX** (criação, consulta, reembolso)
+- 📋 **Planos** (criar, consultar, listar, atualizar)
 - 🔄 **Assinaturas** (criar, pausar, retomar, cancelar, consultar, listar)
 - 📅 **Pagamentos Recorrentes** (gerenciamento completo)
 - 🔔 **Webhooks** (registro, listagem, exclusão, consulta)
@@ -21,22 +22,26 @@ Node customizado do n8n para processamento de pagamentos via Mercado Pago, com s
 ### Instalação Local (Desenvolvimento)
 
 1. Clone o repositório:
+
 ```bash
 git clone https://github.com/eliveutonsouza/n8n-nodes-mercadopago-pix-assinatura.git
 cd n8n-nodes-mercadopago-pix-assinatura
 ```
 
 2. Instale as dependências:
+
 ```bash
 npm install
 ```
 
 3. Compile o projeto:
+
 ```bash
 npm run build
 ```
 
 4. Para desenvolvimento com watch mode:
+
 ```bash
 npm run dev
 ```
@@ -46,11 +51,13 @@ npm run dev
 **Recomendado**: Instale via npm para facilitar atualizações.
 
 1. No diretório do seu n8n self-hosted, instale o pacote:
+
 ```bash
 npm install n8n-nodes-mercadopago-pix-assinatura
 ```
 
 2. Reinicie o n8n:
+
 ```bash
 # Se estiver usando Docker
 docker restart n8n
@@ -88,11 +95,13 @@ docker restart n8n
 Cria um novo pagamento PIX e retorna o QR Code para pagamento.
 
 **Campos obrigatórios:**
+
 - Valor (em reais, ex: 10.50)
 - Descrição
 - E-mail do Pagador
 
 **Campos opcionais:**
+
 - CPF/CNPJ do Pagador
 - Nome do Pagador
 - Data de Expiração
@@ -100,6 +109,7 @@ Cria um novo pagamento PIX e retorna o QR Code para pagamento.
 - Chave de Idempotência
 
 **Resposta:**
+
 ```json
 {
   "id": "123456789",
@@ -120,9 +130,11 @@ Cria um novo pagamento PIX e retorna o QR Code para pagamento.
 Consulta o status de um pagamento PIX existente.
 
 **Campos obrigatórios:**
+
 - ID do Pagamento
 
 **Resposta:**
+
 ```json
 {
   "id": "123456789",
@@ -139,9 +151,11 @@ Consulta o status de um pagamento PIX existente.
 Reembolsa total ou parcialmente um pagamento PIX.
 
 **Campos obrigatórios:**
+
 - ID do Pagamento
 
 **Campos opcionais:**
+
 - Valor do Reembolso (deixe vazio para reembolso total)
 
 ### Assinaturas - Criar
@@ -149,10 +163,12 @@ Reembolsa total ou parcialmente um pagamento PIX.
 Cria uma nova assinatura baseada em um plano existente.
 
 **Campos obrigatórios:**
+
 - ID do Plano
 - E-mail do Pagador
 
 **Campos opcionais:**
+
 - CPF/CNPJ do Pagador
 - Data de Início
 - Período de Trial (dias)
@@ -162,6 +178,7 @@ Cria uma nova assinatura baseada em um plano existente.
 Gerencia o status de uma assinatura existente.
 
 **Campos obrigatórios:**
+
 - ID da Assinatura
 
 ### Assinaturas - Consultar/Listar
@@ -173,6 +190,7 @@ Consulta uma assinatura específica ou lista todas as assinaturas.
 Gerencia pagamentos recorrentes com histórico e próxima cobrança.
 
 **Operações disponíveis:**
+
 - Criar
 - Listar
 - Cancelar
@@ -183,13 +201,16 @@ Gerencia pagamentos recorrentes com histórico e próxima cobrança.
 Registra um novo webhook para receber notificações de eventos.
 
 **Campos obrigatórios:**
+
 - URL (deve ser acessível publicamente)
 
 **Campos opcionais:**
+
 - Eventos (payment, subscription)
 - Descrição
 
 **Eventos disponíveis:**
+
 - `payment` - Notificações de pagamentos
 - `subscription` - Notificações de assinaturas
 
@@ -211,6 +232,7 @@ Para testar localmente:
 
 1. Configure credenciais sandbox do Mercado Pago
 2. Execute o n8n em modo desenvolvimento:
+
 ```bash
 npm run dev
 ```
@@ -226,10 +248,12 @@ Todas as respostas seguem um formato padronizado:
 {
   "id": "string",
   "status": "string",
-  "amount": 0.00,
+  "amount": 0.0,
   "currency": "BRL",
   "createdAt": "ISO8601",
-  "raw": { /* Dados completos da API */ }
+  "raw": {
+    /* Dados completos da API */
+  }
 }
 ```
 
@@ -238,22 +262,27 @@ O campo `raw` contém a resposta completa da API do Mercado Pago para acesso a t
 ## 🐛 Troubleshooting
 
 ### Erro: "Credenciais não encontradas"
+
 - Verifique se as credenciais foram configuradas corretamente no n8n
 - Certifique-se de que o Access Token está válido
 
 ### Erro: "E-mail do pagador inválido"
+
 - Verifique o formato do e-mail (deve conter @ e domínio válido)
 
 ### Erro: "CPF/CNPJ inválido"
+
 - CPF deve conter 11 dígitos numéricos
 - CNPJ deve conter 14 dígitos numéricos
 - Caracteres especiais são removidos automaticamente
 
 ### Erro: "Valor do pagamento deve ser maior que zero"
+
 - Verifique se o valor está correto
 - Valores são convertidos automaticamente para centavos
 
 ### Webhook não recebe notificações
+
 - Verifique se a URL é acessível publicamente
 - Certifique-se de que o servidor está rodando e acessível
 - Verifique os logs do Mercado Pago no painel de desenvolvedores
@@ -290,4 +319,3 @@ Eliveuton Souza - eliveuton3m@hotmail.com
 
 - Equipe do n8n pela excelente plataforma
 - Mercado Pago pela API robusta e documentação completa
-

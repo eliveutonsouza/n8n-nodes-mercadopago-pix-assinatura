@@ -8,6 +8,7 @@ import {
 import {
 	MercadoPagoCredentials,
 	Payment,
+	Plan,
 	Subscription,
 	Webhook,
 	NormalizedResponse,
@@ -52,6 +53,10 @@ export class PixPayment implements INodeType {
 					{
 						name: 'PIX',
 						value: 'pix',
+					},
+					{
+						name: 'Plano',
+						value: 'plans',
 					},
 					{
 						name: 'Assinatura',
@@ -600,6 +605,9 @@ export class PixPayment implements INodeType {
 					case 'pix':
 						responseData = await PixPayment.handlePixOperation(this, operation, i, baseUrl, credentials);
 						break;
+					case 'plans':
+						responseData = await PixPayment.handlePlanOperation(this, operation, i, baseUrl, credentials);
+						break;
 					case 'subscriptions':
 						responseData = await PixPayment.handleSubscriptionOperation(this, operation, i, baseUrl, credentials);
 						break;
@@ -799,6 +807,185 @@ export class PixPayment implements INodeType {
 		);
 
 		return response;
+	}
+
+	private static async handlePlanOperation(
+		executeFunctions: IExecuteFunctions,
+		operation: string,
+		itemIndex: number,
+		baseUrl: string,
+		credentials: MercadoPagoCredentials,
+	): Promise<any> {
+		switch (operation) {
+			case 'create':
+				return await PixPayment.createPlan(executeFunctions, itemIndex, baseUrl, credentials);
+			case 'get':
+				return await PixPayment.getPlan(executeFunctions, itemIndex, baseUrl, credentials);
+			case 'list':
+				return await PixPayment.listPlans(executeFunctions, itemIndex, baseUrl, credentials);
+			case 'update':
+				return await PixPayment.updatePlan(executeFunctions, itemIndex, baseUrl, credentials);
+			default:
+				throw new Error(`Operação de plano "${operation}" não é suportada`);
+		}
+	}
+
+	private static async createPlan(
+		executeFunctions: IExecuteFunctions,
+		itemIndex: number,
+		baseUrl: string,
+		credentials: MercadoPagoCredentials,
+	): Promise<Plan> {
+		const reason = executeFunctions.getNodeParameter('reason', itemIndex) as string;
+		const amount = executeFunctions.getNodeParameter('amount', itemIndex) as number;
+		const frequency = executeFunctions.getNodeParameter('frequency', itemIndex) as number;
+		const frequencyType = executeFunctions.getNodeParameter('frequencyType', itemIndex) as string;
+
+		if (!reason || reason.trim() === '') {
+			throw new Error('Nome do plano é obrigatório');
+		}
+
+		if (amount <= 0) {
+			throw new Error('Valor do plano deve ser maior que zero');
+		}
+
+		if (frequency <= 0) {
+			throw new Error('Frequência deve ser maior que zero');
+		}
+
+		if (frequencyType !== 'days' && frequencyType !== 'months') {
+			throw new Error('Tipo de frequência deve ser "days" ou "months"');
+		}
+
+		const body: any = {
+			reason,
+			auto_recurring: {
+				frequency,
+				frequency_type: frequencyType,
+				transaction_amount: normalizeAmount(amount),
+				currency_id: 'BRL',
+			},
+			payment_methods_allowed: {
+				payment_types: [
+					{ id: 'credit_card' },
+				],
+			},
+		};
+
+		const response = await executeFunctions.helpers.requestWithAuthentication.call(
+			executeFunctions,
+			'pixPaymentApi',
+			{
+				method: 'POST',
+				url: `${baseUrl}/preapproval_plan`,
+				body,
+				headers: {
+					Authorization: `Bearer ${credentials.accessToken}`,
+					'Content-Type': 'application/json',
+				},
+				json: true,
+			},
+		);
+
+		return response as Plan;
+	}
+
+	private static async getPlan(
+		executeFunctions: IExecuteFunctions,
+		itemIndex: number,
+		baseUrl: string,
+		credentials: MercadoPagoCredentials,
+	): Promise<Plan> {
+		const planId = executeFunctions.getNodeParameter('planId', itemIndex) as string;
+
+		if (!planId || planId.trim() === '') {
+			throw new Error('ID do plano é obrigatório');
+		}
+
+		const response = await executeFunctions.helpers.requestWithAuthentication.call(
+			executeFunctions,
+			'pixPaymentApi',
+			{
+				method: 'GET',
+				url: `${baseUrl}/preapproval_plan/${planId}`,
+				headers: {
+					Authorization: `Bearer ${credentials.accessToken}`,
+				},
+				json: true,
+			},
+		);
+
+		return response as Plan;
+	}
+
+	private static async listPlans(
+		executeFunctions: IExecuteFunctions,
+		_itemIndex: number,
+		baseUrl: string,
+		credentials: MercadoPagoCredentials,
+	): Promise<any> {
+		const response = await executeFunctions.helpers.requestWithAuthentication.call(
+			executeFunctions,
+			'pixPaymentApi',
+			{
+				method: 'GET',
+				url: `${baseUrl}/preapproval_plan/search`,
+				headers: {
+					Authorization: `Bearer ${credentials.accessToken}`,
+				},
+				json: true,
+			},
+		);
+
+		return response;
+	}
+
+	private static async updatePlan(
+		executeFunctions: IExecuteFunctions,
+		itemIndex: number,
+		baseUrl: string,
+		credentials: MercadoPagoCredentials,
+	): Promise<Plan> {
+		const planId = executeFunctions.getNodeParameter('planId', itemIndex) as string;
+		const reason = executeFunctions.getNodeParameter('reason', itemIndex) as string;
+		const amount = executeFunctions.getNodeParameter('amount', itemIndex) as number;
+
+		if (!planId || planId.trim() === '') {
+			throw new Error('ID do plano é obrigatório');
+		}
+
+		const body: any = {};
+		
+		if (reason && reason.trim() !== '') {
+			body.reason = reason;
+		}
+		
+		if (amount && amount > 0) {
+			body.auto_recurring = {
+				transaction_amount: normalizeAmount(amount),
+			};
+		}
+
+		if (Object.keys(body).length === 0) {
+			throw new Error('É necessário fornecer pelo menos um campo para atualizar (nome ou valor)');
+		}
+
+		const response = await executeFunctions.helpers.requestWithAuthentication.call(
+			executeFunctions,
+			'pixPaymentApi',
+			{
+				method: 'PUT',
+				url: `${baseUrl}/preapproval_plan/${planId}`,
+				body,
+				headers: {
+					Authorization: `Bearer ${credentials.accessToken}`,
+					'Content-Type': 'application/json',
+				},
+				json: true,
+			},
+		);
+
+		return response as Plan;
 	}
 
 	private static async handleSubscriptionOperation(
@@ -1293,6 +1480,12 @@ export class PixPayment implements INodeType {
 				normalized.qrCodeBase64 = data.point_of_interaction?.transaction_data?.qr_code_base64;
 				normalized.description = data.description;
 				normalized.payerEmail = data.payer?.email;
+				break;
+
+			case 'plans':
+				normalized.planId = data.id;
+				normalized.amount = data.auto_recurring?.transaction_amount ? data.auto_recurring.transaction_amount / 100 : undefined;
+				normalized.description = data.reason;
 				break;
 
 			case 'subscriptions':

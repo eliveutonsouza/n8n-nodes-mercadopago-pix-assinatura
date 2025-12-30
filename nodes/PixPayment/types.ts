@@ -61,6 +61,24 @@ export interface Subscription {
 	operation_type?: string;
 }
 
+export interface Plan {
+	id: string;
+	status: string;
+	reason: string;
+	auto_recurring: {
+		frequency: number;
+		frequency_type: string;
+		transaction_amount: number;
+		currency_id: string;
+	};
+	payment_methods_allowed?: {
+		payment_types?: Array<{ id: string }>;
+		payment_methods?: Array<{ id: string }>;
+	};
+	date_created?: string;
+	last_modified?: string;
+}
+
 export interface RecurringPayment {
 	id: string;
 	status: string;

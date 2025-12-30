@@ -371,6 +371,133 @@ Cancela um pagamento recorrente.
 
 ---
 
+## 📋 Planos
+
+### Criar Plano
+
+Cria um novo plano de assinatura no Mercado Pago.
+
+#### Campos Disponíveis
+
+| Campo | Tipo | Obrigatório | Descrição | Exemplo |
+|-------|------|-------------|-----------|---------|
+| Nome do Plano | string | ✅ Sim | Nome/descrição do plano | `"Plano Mensal Premium"` |
+| Valor | number | ✅ Sim | Valor do plano em reais | `99.99` |
+| Frequência | number | ✅ Sim | Frequência de cobrança (ex: 1 para mensal) | `1` |
+| Tipo de Frequência | options | ✅ Sim | Tipo de frequência (dias ou meses) | `"months"` |
+
+**Opções de Tipo de Frequência:**
+- `days` - Dias
+- `months` - Meses
+
+#### Exemplo JSON Completo
+
+```json
+{
+  "resource": "plans",
+  "operation": "create",
+  "reason": "Plano Mensal Premium",
+  "amount": 99.99,
+  "frequency": 1,
+  "frequencyType": "months"
+}
+```
+
+#### Exemplo JSON - Plano Semanal
+
+```json
+{
+  "resource": "plans",
+  "operation": "create",
+  "reason": "Plano Semanal",
+  "amount": 29.99,
+  "frequency": 7,
+  "frequencyType": "days"
+}
+```
+
+---
+
+### Consultar Plano
+
+Consulta um plano específico.
+
+#### Campos Disponíveis
+
+| Campo | Tipo | Obrigatório | Descrição | Exemplo |
+|-------|------|-------------|-----------|---------|
+| ID do Plano | string | ✅ Sim | ID do plano a ser consultado | `"PLAN_123456"` |
+
+#### Exemplo JSON
+
+```json
+{
+  "resource": "plans",
+  "operation": "get",
+  "planId": "PLAN_123456"
+}
+```
+
+---
+
+### Listar Planos
+
+Lista todos os planos criados.
+
+#### Campos Disponíveis
+
+Esta operação não requer campos adicionais.
+
+#### Exemplo JSON
+
+```json
+{
+  "resource": "plans",
+  "operation": "list"
+}
+```
+
+---
+
+### Atualizar Plano
+
+Atualiza um plano existente.
+
+#### Campos Disponíveis
+
+| Campo | Tipo | Obrigatório | Descrição | Exemplo |
+|-------|------|-------------|-----------|---------|
+| ID do Plano | string | ✅ Sim | ID do plano a ser atualizado | `"PLAN_123456"` |
+| Nome do Plano | string | ❌ Não | Novo nome/descrição do plano | `"Plano Atualizado"` |
+| Valor | number | ❌ Não | Novo valor do plano em reais | `149.99` |
+
+**Nota**: É necessário fornecer pelo menos um campo (nome ou valor) para atualizar.
+
+#### Exemplo JSON - Atualizar Nome e Valor
+
+```json
+{
+  "resource": "plans",
+  "operation": "update",
+  "planId": "PLAN_123456",
+  "reason": "Plano Atualizado",
+  "amount": 149.99
+}
+```
+
+#### Exemplo JSON - Atualizar Apenas Valor
+
+```json
+{
+  "resource": "plans",
+  "operation": "update",
+  "planId": "PLAN_123456",
+  "amount": 149.99
+}
+```
+
+---
+
 ## 🔔 Webhooks
 
 ### Registrar Webhook
