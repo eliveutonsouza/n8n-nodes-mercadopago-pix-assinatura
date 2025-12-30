@@ -91,20 +91,17 @@ describe('Validação de Rotas do Mercado Pago', () => {
         });
       });
 
-      describe('Recurso Assinaturas', () => {
+	describe('Recurso Assinaturas', () => {
 		it('deve ter operações: create, pause, resume, cancel, get, list', () => {
 			const subscriptionOperations = ['create', 'pause', 'resume', 'cancel', 'get', 'list'];
 			const operationProperty = node.description.properties?.find(
-				(p) => p.name === 'operation',
+				(p) =>
+					p.name === 'operation' &&
+					p.displayOptions?.show?.resource?.includes('subscriptions'),
 			);
 
 			if (operationProperty?.options) {
-				const operations = operationProperty.options
-					.filter((opt: any) => {
-						const displayOptions = opt.displayOptions || operationProperty.displayOptions;
-						return displayOptions?.show?.resource?.includes('subscriptions');
-					})
-					.map((opt: any) => opt.value);
+				const operations = operationProperty.options.map((opt: any) => opt.value);
 
 				subscriptionOperations.forEach((op) => {
 					expect(operations).toContain(op);
@@ -117,16 +114,13 @@ describe('Validação de Rotas do Mercado Pago', () => {
 		it('deve ter operações: create, list, cancel, get', () => {
 			const recurringOperations = ['create', 'list', 'cancel', 'get'];
 			const operationProperty = node.description.properties?.find(
-				(p) => p.name === 'operation',
+				(p) =>
+					p.name === 'operation' &&
+					p.displayOptions?.show?.resource?.includes('recurringPayments'),
 			);
 
 			if (operationProperty?.options) {
-				const operations = operationProperty.options
-					.filter((opt: any) => {
-						const displayOptions = opt.displayOptions || operationProperty.displayOptions;
-						return displayOptions?.show?.resource?.includes('recurringPayments');
-					})
-					.map((opt: any) => opt.value);
+				const operations = operationProperty.options.map((opt: any) => opt.value);
 
 				recurringOperations.forEach((op) => {
 					expect(operations).toContain(op);
@@ -139,16 +133,13 @@ describe('Validação de Rotas do Mercado Pago', () => {
 		it('deve ter operações: register, list, delete, get', () => {
 			const webhookOperations = ['register', 'list', 'delete', 'get'];
 			const operationProperty = node.description.properties?.find(
-				(p) => p.name === 'operation',
+				(p) =>
+					p.name === 'operation' &&
+					p.displayOptions?.show?.resource?.includes('webhooks'),
 			);
 
 			if (operationProperty?.options) {
-				const operations = operationProperty.options
-					.filter((opt: any) => {
-						const displayOptions = opt.displayOptions || operationProperty.displayOptions;
-						return displayOptions?.show?.resource?.includes('webhooks');
-					})
-					.map((opt: any) => opt.value);
+				const operations = operationProperty.options.map((opt: any) => opt.value);
 
 				webhookOperations.forEach((op) => {
 					expect(operations).toContain(op);

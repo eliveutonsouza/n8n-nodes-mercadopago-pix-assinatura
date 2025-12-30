@@ -22,6 +22,7 @@ import {
 	validateEmail,
 	handleMercadoPagoError,
 	normalizeNumericValue,
+	getNodeParameterSafe,
 } from './helpers';
 
 export class PixPayment implements INodeType {
@@ -745,8 +746,21 @@ export class PixPayment implements INodeType {
 
 		for (let i = 0; i < items.length; i++) {
 			try {
-				const resource = this.getNodeParameter('resource', i) as string;
-				const operation = this.getNodeParameter('operation', i) as string;
+				let resource: string;
+				let operation: string;
+				
+				try {
+					resource = this.getNodeParameter('resource', i) as string;
+					operation = this.getNodeParameter('operation', i) as string;
+				} catch (error: any) {
+					if (error?.message?.includes('Could not get parameter')) {
+						throw new Error(
+							`Erro ao obter parâmetros do node. Verifique se os campos "Resource" e "Operation" estão preenchidos corretamente. ` +
+							`Detalhes: ${error.message}`
+						);
+					}
+					throw error;
+				}
 
 				let responseData: any;
 
@@ -985,10 +999,30 @@ export class PixPayment implements INodeType {
 		baseUrl: string,
 		credentials: MercadoPagoCredentials,
 	): Promise<Plan> {
-		const reason = executeFunctions.getNodeParameter('reason', itemIndex, '') as string;
-		const amountRaw = executeFunctions.getNodeParameter('amount', itemIndex, 0) as number | string;
-		const frequencyRaw = executeFunctions.getNodeParameter('frequency', itemIndex, 1) as number | string;
-		const frequencyType = executeFunctions.getNodeParameter('frequencyType', itemIndex, 'months') as string;
+		const reason = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'reason',
+			itemIndex,
+			'',
+		) as string;
+		const amountRaw = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'amount',
+			itemIndex,
+			0,
+		) as number | string;
+		const frequencyRaw = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'frequency',
+			itemIndex,
+			1,
+		) as number | string;
+		const frequencyType = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'frequencyType',
+			itemIndex,
+			'months',
+		) as string;
 
 		// Normaliza valores numéricos (converte vírgula para ponto)
 		const amount = normalizeNumericValue(amountRaw);
@@ -1099,9 +1133,24 @@ export class PixPayment implements INodeType {
 		baseUrl: string,
 		credentials: MercadoPagoCredentials,
 	): Promise<Plan> {
-		const planId = executeFunctions.getNodeParameter('planId', itemIndex, '') as string;
-		const reason = executeFunctions.getNodeParameter('reason', itemIndex, '') as string;
-		const amountRaw = executeFunctions.getNodeParameter('amount', itemIndex, 0) as number | string;
+		const planId = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'planId',
+			itemIndex,
+			'',
+		) as string;
+		const reason = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'reason',
+			itemIndex,
+			'',
+		) as string;
+		const amountRaw = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'amount',
+			itemIndex,
+			0,
+		) as number | string;
 
 		if (!planId || planId.trim() === '') {
 			throw new Error('ID do plano é obrigatório');

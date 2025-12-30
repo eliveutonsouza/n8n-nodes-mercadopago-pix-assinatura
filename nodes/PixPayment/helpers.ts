@@ -128,3 +128,25 @@ export function normalizeNumericValue(value: string | number | undefined | null)
 	return isNaN(parsed) ? 0 : parsed;
 }
 
+/**
+ * Obtém parâmetro do node de forma segura, retornando valor padrão em caso de erro
+ * Útil para parâmetros que podem não estar visíveis devido a displayOptions
+ */
+export function getNodeParameterSafe<T>(
+	getNodeParameter: (name: string, itemIndex: number, fallback?: T) => T,
+	name: string,
+	itemIndex: number,
+	fallback: T,
+): T {
+	try {
+		return getNodeParameter(name, itemIndex, fallback);
+	} catch (error: any) {
+		// Se o erro for "Could not get parameter", retorna o valor padrão
+		if (error?.message?.includes('Could not get parameter') || error?.message?.includes('parameter')) {
+			return fallback;
+		}
+		// Para outros erros, relança
+		throw error;
+	}
+}
+
