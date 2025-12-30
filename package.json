@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-mercadopago-pix-assinatura",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "n8n node para processamento de pagamentos PIX e assinaturas via Mercado Pago",
   "keywords": [
     "n8n",
