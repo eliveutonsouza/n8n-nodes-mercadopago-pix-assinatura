@@ -888,7 +888,7 @@ export class PixPayment implements INodeType {
 			'Content-Type': 'application/json',
 		};
 
-		if (idempotencyKey) {
+		if (idempotencyKey && idempotencyKey.trim() !== '') {
 			headers['X-Idempotency-Key'] = idempotencyKey;
 		}
 
@@ -1057,6 +1057,7 @@ export class PixPayment implements INodeType {
 					{ id: 'credit_card' },
 				],
 			},
+			back_url: 'https://www.mercadopago.com.br',
 		};
 
 		const response = await executeFunctions.helpers.requestWithAuthentication.call(
