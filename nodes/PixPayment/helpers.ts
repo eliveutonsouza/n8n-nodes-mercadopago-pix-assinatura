@@ -141,8 +141,22 @@ export function getNodeParameterSafe<T>(
 	try {
 		return getNodeParameter(name, itemIndex, fallback);
 	} catch (error: any) {
-		// Se o erro for "Could not get parameter", retorna o valor padrão
-		if (error?.message?.includes('Could not get parameter') || error?.message?.includes('parameter')) {
+		// Captura qualquer erro relacionado a parâmetros
+		const errorMessage = error?.message?.toLowerCase() || '';
+		const errorName = error?.name?.toLowerCase() || '';
+		const errorCode = error?.code?.toLowerCase() || '';
+		
+		// Verifica múltiplas condições para identificar erros de parâmetro
+		if (
+			errorMessage.includes('could not get parameter') ||
+			errorMessage.includes('parameter') ||
+			errorMessage.includes('not found') ||
+			errorMessage.includes('missing parameter') ||
+			errorName.includes('parameter') ||
+			errorCode === 'parameter_not_found' ||
+			error?.code === 'PARAMETER_NOT_FOUND' ||
+			error?.name === 'ParameterNotFoundError'
+		) {
 			return fallback;
 		}
 		// Para outros erros, relança

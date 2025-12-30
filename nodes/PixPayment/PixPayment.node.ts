@@ -970,13 +970,29 @@ export class PixPayment implements INodeType {
             );
             break;
           case "plans":
-            responseData = await PixPayment.handlePlanOperation(
-              this,
-              operation,
-              i,
-              baseUrl,
-              credentials
-            );
+            try {
+              responseData = await PixPayment.handlePlanOperation(
+                this,
+                operation,
+                i,
+                baseUrl,
+                credentials
+              );
+            } catch (planError: any) {
+              // Tratamento específico para erros de parâmetros em planos
+              if (
+                planError?.message?.includes("Could not get parameter") ||
+                planError?.message?.toLowerCase().includes("parameter")
+              ) {
+                throw new Error(
+                  `Erro ao obter parâmetros para criar plano. ` +
+                    `Verifique se todos os campos obrigatórios estão preenchidos: ` +
+                    `Nome do Plano, Valor, Frequência, Tipo de Frequência, Moeda e URL de Retorno. ` +
+                    `Detalhes: ${planError.message}`
+                );
+              }
+              throw planError;
+            }
             break;
           case "subscriptions":
             responseData = await PixPayment.handleSubscriptionOperation(
@@ -1313,43 +1329,67 @@ export class PixPayment implements INodeType {
     baseUrl: string,
     credentials: MercadoPagoCredentials
   ): Promise<Plan> {
-    // Campos obrigatórios
-    const reason = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "reason",
-      itemIndex,
-      ""
-    ) as string;
-    const amountRaw = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "amount",
-      itemIndex,
-      0
-    ) as number | string;
-    const frequencyRaw = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "frequency",
-      itemIndex,
-      1
-    ) as number | string;
-    const frequencyType = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "frequencyType",
-      itemIndex,
-      "months"
-    ) as string;
-    const currencyId = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "currencyId",
-      itemIndex,
-      "BRL"
-    ) as string;
-    const backUrl = getNodeParameterSafe(
-      executeFunctions.getNodeParameter.bind(executeFunctions),
-      "backUrl",
-      itemIndex,
-      "https://www.mercadopago.com.br"
-    ) as string;
+    // Campos obrigatórios - usando getNodeParameterSafe para todos para evitar erros
+    // mesmo que o campo não esteja visível no momento
+    let reason: string;
+    let amountRaw: number | string;
+    let frequencyRaw: number | string;
+    let frequencyType: string;
+    let currencyId: string;
+    let backUrl: string;
+
+    try {
+      reason = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "reason",
+        itemIndex,
+        ""
+      ) as string;
+      amountRaw = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "amount",
+        itemIndex,
+        0
+      ) as number | string;
+      frequencyRaw = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "frequency",
+        itemIndex,
+        1
+      ) as number | string;
+      frequencyType = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "frequencyType",
+        itemIndex,
+        "months"
+      ) as string;
+      currencyId = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "currencyId",
+        itemIndex,
+        "BRL"
+      ) as string;
+      backUrl = getNodeParameterSafe(
+        executeFunctions.getNodeParameter.bind(executeFunctions),
+        "backUrl",
+        itemIndex,
+        "https://www.mercadopago.com.br"
+      ) as string;
+    } catch (error: any) {
+      // Captura erros de parâmetros e fornece mensagem mais clara
+      if (
+        error?.message?.toLowerCase().includes("parameter") ||
+        error?.message?.toLowerCase().includes("could not get")
+      ) {
+        throw new Error(
+          `Erro ao acessar parâmetros do plano. ` +
+            `Certifique-se de que todos os campos obrigatórios estão preenchidos: ` +
+            `Nome do Plano, Valor, Frequência, Tipo de Frequência, Moeda e URL de Retorno. ` +
+            `Erro original: ${error.message}`
+        );
+      }
+      throw error;
+    }
 
     // Campos opcionais
     const repetitionsRaw = getNodeParameterSafe(
