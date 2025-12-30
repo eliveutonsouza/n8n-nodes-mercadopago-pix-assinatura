@@ -834,11 +834,38 @@ export class PixPayment implements INodeType {
 		const amount = executeFunctions.getNodeParameter('amount', itemIndex) as number;
 		const description = executeFunctions.getNodeParameter('description', itemIndex) as string;
 		const payerEmail = executeFunctions.getNodeParameter('payerEmail', itemIndex) as string;
-		const payerDocument = executeFunctions.getNodeParameter('payerDocument', itemIndex) as string;
-		const payerName = executeFunctions.getNodeParameter('payerName', itemIndex) as string;
-		const expirationDate = executeFunctions.getNodeParameter('expirationDate', itemIndex) as string;
-		const externalReference = executeFunctions.getNodeParameter('externalReference', itemIndex) as string;
-		const idempotencyKey = executeFunctions.getNodeParameter('idempotencyKey', itemIndex) as string;
+		
+		// Usar getNodeParameterSafe para campos opcionais
+		const payerDocument = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'payerDocument',
+			itemIndex,
+			'',
+		) as string;
+		const payerName = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'payerName',
+			itemIndex,
+			'',
+		) as string;
+		const expirationDate = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'expirationDate',
+			itemIndex,
+			'',
+		) as string;
+		const externalReference = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'externalReference',
+			itemIndex,
+			'',
+		) as string;
+		const idempotencyKey = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'idempotencyKey',
+			itemIndex,
+			'',
+		) as string;
 
 		// Validações
 		if (!validateEmail(payerEmail)) {
@@ -942,7 +969,14 @@ export class PixPayment implements INodeType {
 		credentials: MercadoPagoCredentials,
 	): Promise<any> {
 		const paymentId = executeFunctions.getNodeParameter('paymentId', itemIndex) as string;
-		const refundAmount = executeFunctions.getNodeParameter('refundAmount', itemIndex) as number;
+		
+		// Usar getNodeParameterSafe para campo opcional
+		const refundAmount = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'refundAmount',
+			itemIndex,
+			0,
+		) as number;
 
 		if (!paymentId) {
 			throw new Error('ID do pagamento é obrigatório');
@@ -1227,9 +1261,26 @@ export class PixPayment implements INodeType {
 	): Promise<Subscription> {
 		const planId = executeFunctions.getNodeParameter('planId', itemIndex) as string;
 		const payerEmail = executeFunctions.getNodeParameter('payerEmail', itemIndex) as string;
-		const payerDocument = executeFunctions.getNodeParameter('payerDocument', itemIndex) as string;
-		const startDate = executeFunctions.getNodeParameter('startDate', itemIndex) as string;
-		const trialPeriodDays = executeFunctions.getNodeParameter('trialPeriodDays', itemIndex) as number;
+		
+		// Usar getNodeParameterSafe para campos opcionais
+		const payerDocument = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'payerDocument',
+			itemIndex,
+			'',
+		) as string;
+		const startDate = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'startDate',
+			itemIndex,
+			'',
+		) as string;
+		const trialPeriodDays = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'trialPeriodDays',
+			itemIndex,
+			0,
+		) as number;
 
 		if (!validateEmail(payerEmail)) {
 			throw new Error('E-mail do pagador inválido');
@@ -1240,7 +1291,7 @@ export class PixPayment implements INodeType {
 			payer_email: payerEmail,
 		};
 
-		if (payerDocument) {
+		if (payerDocument && payerDocument.trim() !== '') {
 			const docType = getDocumentType(payerDocument);
 			if (!docType) {
 				throw new Error('CPF/CNPJ inválido');
@@ -1253,7 +1304,7 @@ export class PixPayment implements INodeType {
 			};
 		}
 
-		if (startDate) {
+		if (startDate && startDate.trim() !== '') {
 			body.start_date = new Date(startDate).toISOString();
 		}
 
@@ -1486,7 +1537,13 @@ export class PixPayment implements INodeType {
 		baseUrl: string,
 		credentials: MercadoPagoCredentials,
 	): Promise<any> {
-		const customerId = executeFunctions.getNodeParameter('customerId', itemIndex) as string;
+		// Usar getNodeParameterSafe para campo opcional
+		const customerId = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'customerId',
+			itemIndex,
+			'',
+		) as string;
 
 		let url = `${baseUrl}/preapproval/search`;
 		if (customerId) {
@@ -1565,8 +1622,20 @@ export class PixPayment implements INodeType {
 		credentials: MercadoPagoCredentials,
 	): Promise<Webhook> {
 		const url = executeFunctions.getNodeParameter('url', itemIndex) as string;
-		const events = executeFunctions.getNodeParameter('events', itemIndex) as string[];
-		const description = executeFunctions.getNodeParameter('description', itemIndex) as string;
+		
+		// Usar getNodeParameterSafe para campos opcionais
+		const events = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'events',
+			itemIndex,
+			[],
+		) as string[];
+		const description = getNodeParameterSafe(
+			executeFunctions.getNodeParameter.bind(executeFunctions),
+			'description',
+			itemIndex,
+			'',
+		) as string;
 
 		if (!url || !url.startsWith('http')) {
 			throw new Error('URL do webhook deve ser uma URL válida (http:// ou https://)');
