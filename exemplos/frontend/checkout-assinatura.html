@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Assinatura Premium</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    #form-checkout {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .container-field {
+      height: 50px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+
+    .container-field:focus-within {
+      border-color: #009ee3;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #009ee3;
+    }
+
+    button {
+      background: linear-gradient(135deg, #009ee3 0%, #0078a8 100%);
+      color: white;
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 158, 227, 0.3);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 20px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar.active {
+      display: block;
+    }
+
+    .progress-bar progress {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #009ee3;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    .info-box p {
+      margin: 5px 0;
+      color: #004085;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Assinatura Premium</h1>
+    <p class="subtitle">Complete seus dados para começar</p>
+
+    <div class="info-box">
+      <p><strong>💰 Valor:</strong> R$ 29,90/mês</p>
+      <p><strong>✅ Benefícios:</strong> Acesso completo a todos os recursos</p>
+    </div>
+
+    <form id="form-checkout">
+      <!-- Campos do cartão (preenchidos pelo CardForm) -->
+      <div class="form-group">
+        <label>Número do Cartão</label>
+        <div id="form-checkout__cardNumber" class="container-field"></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="form-group">
+          <label>Validade (MM/AA)</label>
+          <div id="form-checkout__expirationDate" class="container-field"></div>
+        </div>
+
+        <div class="form-group">
+          <label>CVV</label>
+          <div id="form-checkout__securityCode" class="container-field"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nome no Cartão</label>
+        <input 
+          type="text" 
+          id="form-checkout__cardholderName" 
+          placeholder="Nome como está no cartão"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Banco Emissor</label>
+        <select id="form-checkout__issuer">
+          <option value="">Selecione o banco</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Parcelas</label>
+        <select id="form-checkout__installments">
+          <option value="">Selecione as parcelas</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Documento</label>
+        <select id="form-checkout__identificationType">
+          <option value="">Selecione o tipo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>CPF/CNPJ</label>
+        <input 
+          type="text" 
+          id="form-checkout__identificationNumber" 
+          placeholder="Apenas números"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label>E-mail</label>
+        <input 
+          type="email" 
+          id="form-checkout__cardholderEmail" 
+          placeholder="seu@email.com"
+          required
+        />
+      </div>
+
+      <button type="submit" id="form-checkout__submit">
+        Assinar Agora
+      </button>
+
+      <div class="progress-bar" id="progress-bar">
+        <progress value="0">Carregando...</progress>
+      </div>
+
+      <div class="message" id="message"></div>
+    </form>
+  </div>
+
+  <!-- MercadoPago.js -->
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+  <script>
+    // ⚠️ IMPORTANTE: Substitua pela sua PUBLIC_KEY do Mercado Pago
+    // Obtenha em: https://www.mercadopago.com.br/developers/panel/credentials
+    const PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+    
+    // ⚠️ IMPORTANTE: Substitua pela URL do webhook do seu n8n
+    const N8N_WEBHOOK_URL = 'https://seu-n8n.com/webhook/assinatura';
+    
+    // ⚠️ IMPORTANTE: Substitua pelo ID do seu plano
+    const PLAN_ID = 'SEU_PLANO_ID';
+
+    // Configurar MercadoPago
+    const mp = new MercadoPago(PUBLIC_KEY, {
+      locale: 'pt-BR'
+    });
+
+    // Função para exibir mensagem
+    function showMessage(text, type = 'success') {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = `message ${type} show`;
+      
+      if (type === 'success') {
+        setTimeout(() => {
+          messageEl.classList.remove('show');
+        }, 5000);
+      }
+    }
+
+    // Função para enviar dados para n8n
+    async function enviarParaN8n(dados) {
+      try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dados),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const resultado = await response.json();
+        return resultado;
+      } catch (error) {
+        console.error('Erro ao enviar para n8n:', error);
+        throw error;
+      }
+    }
+
+    // Inicializar CardForm
+    const cardForm = mp.cardForm({
+      amount: "29.90",
+      iframe: true,
+      form: {
+        id: "form-checkout",
+        cardNumber: {
+          id: "form-checkout__cardNumber",
+          placeholder: "Número do cartão",
+        },
+        expirationDate: {
+          id: "form-checkout__expirationDate",
+          placeholder: "MM/AA",
+        },
+        securityCode: {
+          id: "form-checkout__securityCode",
+          placeholder: "CVV",
+        },
+        cardholderName: {
+          id: "form-checkout__cardholderName",
+          placeholder: "Nome no cartão",
+        },
+        issuer: {
+          id: "form-checkout__issuer",
+          placeholder: "Banco emissor",
+        },
+        installments: {
+          id: "form-checkout__installments",
+          placeholder: "Parcelas",
+        },
+        identificationType: {
+          id: "form-checkout__identificationType",
+          placeholder: "Tipo de documento",
+        },
+        identificationNumber: {
+          id: "form-checkout__identificationNumber",
+          placeholder: "Número do documento",
+        },
+        cardholderEmail: {
+          id: "form-checkout__cardholderEmail",
+          placeholder: "E-mail",
+        },
+      },
+      callbacks: {
+        onFormMounted: error => {
+          if (error) {
+            console.error("Erro ao montar formulário:", error);
+            showMessage("Erro ao carregar formulário. Recarregue a página.", "error");
+            return;
+          }
+          console.log("Formulário montado com sucesso");
+        },
+        onSubmit: async (event) => {
+          event.preventDefault();
+
+          const submitButton = document.getElementById('form-checkout__submit');
+          const progressBar = document.getElementById('progress-bar');
+          
+          // Desabilitar botão e mostrar progresso
+          submitButton.disabled = true;
+          progressBar.classList.add('active');
+
+          try {
+            // Obter dados do formulário, incluindo o token
+            const {
+              paymentMethodId: payment_method_id,
+              issuerId: issuer_id,
+              cardholderEmail: email,
+              token, // ← Este é o card_token_id!
+              installments,
+              identificationNumber,
+              identificationType,
+            } = cardForm.getCardFormData();
+
+            console.log("Token obtido:", token);
+
+            if (!token) {
+              throw new Error("Token do cartão não foi gerado. Verifique os dados do cartão.");
+            }
+
+            // Enviar para n8n
+            const resultado = await enviarParaN8n({
+              resource: 'subscriptions',
+              operation: 'create',
+              planId: PLAN_ID,
+              payerEmail: email,
+              payerDocument: identificationNumber,
+              cardTokenId: token,
+              subscriptionStatus: 'authorized',
+            });
+
+            // Verificar resultado
+            if (resultado.status === 'authorized') {
+              showMessage("✅ Assinatura criada com sucesso! Você já tem acesso completo.", "success");
+              
+              // Redirecionar após 3 segundos (opcional)
+              setTimeout(() => {
+                window.location.href = '/dashboard'; // Ajuste para sua URL
+              }, 3000);
+            } else if (resultado.initPoint) {
+              // Se retornou init_point, redirecionar para checkout
+              showMessage("Redirecionando para completar o pagamento...", "success");
+              window.location.href = resultado.initPoint;
+            } else {
+              throw new Error(resultado.error || "Erro desconhecido ao criar assinatura");
+            }
+          } catch (error) {
+            console.error("Erro:", error);
+            showMessage(`❌ Erro: ${error.message || "Erro ao processar pagamento. Tente novamente."}`, "error");
+          } finally {
+            // Reabilitar botão e esconder progresso
+            submitButton.disabled = false;
+            progressBar.classList.remove('active');
+          }
+        },
+        onFetching: (resource) => {
+          console.log("Buscando recurso:", resource);
+          const progressBar = document.getElementById('progress-bar');
+          progressBar.classList.add('active');
+          progressBar.querySelector('progress').removeAttribute('value');
+
+          return () => {
+            progressBar.querySelector('progress').setAttribute('value', '0');
+            progressBar.classList.remove('active');
+          };
+        }
+      },
+    });
+
+    // Validação adicional do CPF/CNPJ
+    document.getElementById('form-checkout__identificationNumber').addEventListener('input', function(e) {
+      this.value = this.value.replace(/\D/g, '');
+    });
+  </script>
+</body>
+</html>
+

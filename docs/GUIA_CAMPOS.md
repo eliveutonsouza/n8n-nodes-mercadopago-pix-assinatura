@@ -112,19 +112,19 @@ Reembolsa total ou parcialmente um pagamento PIX.
 
 ### Criar Assinatura
 
-Cria uma nova assinatura baseada em um plano existente.
+Cria uma nova assinatura baseada em um plano existente. Segundo a documentação oficial do Mercado Pago, é possível criar assinaturas com ou sem plano associado.
 
 #### Campos Disponíveis
 
 | Campo | Tipo | Obrigatório | Descrição | Exemplo |
 |-------|------|-------------|-----------|---------|
-| ID do Plano | string | ✅ Sim | ID do plano de assinatura | `"PLAN_123456"` |
-| E-mail do Pagador | string | ✅ Sim | E-mail do pagador | `"cliente@exemplo.com"` |
-| CPF/CNPJ do Pagador | string | ❌ Não | CPF ou CNPJ do pagador | `"12345678909"` |
-| Token do Cartão | string | ❌ Não | Token do cartão de crédito (obtido via Mercado Pago Checkout no front-end). Se não fornecido, a assinatura será criada com status "pending" | `"abc123def456"` |
-| Status da Assinatura | options | ❌ Não | Status inicial: "pending" (sem cartão, retorna init_point) ou "authorized" (com cartão, requer card_token_id) | `"pending"` |
-| Data de Início | dateTime | ❌ Não | Data de início da assinatura | `"2024-01-01T00:00:00.000Z"` |
-| Período de Trial (dias) | number | ❌ Não | Número de dias de período de trial | `7` |
+| ID do Plano | string | ✅ Sim* | ID do plano de assinatura. *Obrigatório apenas se criar assinatura com plano. É possível criar assinatura sem plano. | `"2c938084726fca480172750000000000"` |
+| E-mail do Pagador | string | ✅ Sim | E-mail do pagador. Obrigatório para criar assinatura. Permite obter identificador único do assinante. | `"cliente@exemplo.com"` |
+| CPF/CNPJ do Pagador | string | ❌ Não | CPF ou CNPJ do pagador (apenas números). Recomendado para validação. | `"12345678909"` |
+| Token do Cartão | string | ⚠️ Condicional | Token do cartão (card_token_id) obtido via Checkout Transparente no front-end. **Obrigatório se subscriptionStatus for "authorized"**. Se não fornecido, assinatura será criada com status "pending" e retornará init_point. | `"e3ed6f098462036dd2cbabe314b9de2a"` |
+| Status da Assinatura | options | ❌ Não | Status inicial: "pending" (sem cartão, retorna init_point) ou "authorized" (com cartão, requer card_token_id obrigatório). Padrão: "pending" | `"pending"` ou `"authorized"` |
+| Data de Início | dateTime | ❌ Não | Data de início da assinatura (ISO 8601). Funciona apenas em conjunto com end_date. | `"2024-01-01T00:00:00.000Z"` |
+| Período de Trial (dias) | number | ❌ Não | Número de dias de período de trial grátis | `7` |
 
 #### Exemplo JSON Completo (Com Cartão - Status Authorized)
 
@@ -168,23 +168,42 @@ Cria uma nova assinatura baseada em um plano existente.
 }
 ```
 
-**📝 Notas Importantes:**
+**📝 Notas Importantes (baseadas na documentação oficial):**
 
-1. **Fluxo com Cartão (Authorized):**
+1. **Fluxo com Cartão (Status: "authorized"):**
+   - **Requer `cardTokenId` obrigatório**
    - Forneça `cardTokenId` e `subscriptionStatus: "authorized"`
    - A assinatura será ativada imediatamente
-   - O `cardTokenId` deve ser obtido no **front-end** usando a PUBLIC_KEY do Mercado Pago através do Checkout Transparente
+   - O `cardTokenId` **deve ser obtido no front-end** usando a PUBLIC_KEY do Mercado Pago através do **CardForm** do Checkout Transparente
+   - Veja [Como Obter card_token_id](./COMO_OBTER_CARD_TOKEN.md) para instruções detalhadas
+   - **Importante**: O token expira em 7 dias e pode ser usado apenas uma vez
 
-2. **Fluxo sem Cartão (Pending):**
-   - Não forneça `cardTokenId` e use `subscriptionStatus: "pending"`
-   - A API retornará um `init_point` (URL de checkout)
+2. **Fluxo sem Cartão (Status: "pending"):**
+   - **Não requer `cardTokenId`**
+   - Não forneça `cardTokenId` e use `subscriptionStatus: "pending"` (ou deixe vazio)
+   - A API retornará um `init_point` (URL de checkout do Mercado Pago)
    - Envie o `init_point` ao cliente para que ele complete o pagamento
-   - Após o pagamento, a assinatura será ativada automaticamente
+   - Após o pagamento, a assinatura será ativada automaticamente (status muda para "authorized")
+   - Configure webhooks para ser notificado quando o status mudar
 
-3. **Como obter o card_token_id:**
-   - O token **não pode** ser gerado no backend
-   - Deve ser obtido no navegador usando o SDK do Mercado Pago
-   - Veja a documentação do [Checkout Transparente](https://www.mercadopago.com.br/developers/pt/docs/checkout-api/integration-configuration/card-form)
+3. **Campos Obrigatórios da API (conforme documentação oficial):**
+   - `payer_email`: Obrigatório - Email do pagador
+   - `card_token_id`: Obrigatório apenas se status for "authorized"
+   - `auto_recurring.frequency`: Obrigatório apenas para assinaturas sem plano
+   - `auto_recurring.frequency_type`: Obrigatório apenas para assinaturas sem plano
+   - `auto_recurring.currency_id`: Obrigatório apenas para assinaturas sem plano
+   - `back_url`: Obrigatório apenas para assinaturas sem plano
+
+4. **Como obter o card_token_id:**
+   - O token **deve ser gerado no front-end** usando MercadoPago.js (CardForm)
+   - **Não pode** ser gerado no backend por questões de segurança PCI
+   - Passo a passo completo: [COMO_OBTER_CARD_TOKEN.md](./COMO_OBTER_CARD_TOKEN.md)
+   - Documentação oficial: [Checkout Transparente - CardForm](https://www.mercadopago.com.br/developers/pt/docs/checkout-api/integration-test/test-cards)
+
+5. **Integração Front-end + n8n:**
+   - Veja [INTEGRACAO_FRONTEND_N8N.md](./INTEGRACAO_FRONTEND_N8N.md) para guia completo
+   - O front-end coleta dados do cartão → gera token → envia para n8n
+   - O n8n recebe o token e cria a assinatura na API do Mercado Pago
 
 ---
 

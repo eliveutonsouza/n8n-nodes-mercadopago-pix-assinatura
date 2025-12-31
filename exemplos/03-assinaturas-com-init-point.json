@@ -1,0 +1,415 @@
+{
+  "name": "Mercado Pago - Assinatura com init_point e Webhook",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "webhook-trigger",
+      "name": "Webhook - Criar Assinatura",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "assinatura-create"
+    },
+    {
+      "parameters": {
+        "resource": "subscriptions",
+        "operation": "create",
+        "planId": "={{ $json.body.planId }}",
+        "payerEmail": "={{ $json.body.payerEmail }}",
+        "payerDocument": "={{ $json.body.payerDocument }}",
+        "subscriptionStatus": "={{ $json.body.subscriptionStatus || 'pending' }}",
+        "cardTokenId": "={{ $json.body.cardTokenId || '' }}",
+        "startDate": "={{ $json.body.startDate }}",
+        "trialPeriodDays": "={{ $json.body.trialPeriodDays || 0 }}"
+      },
+      "id": "mercado-pago-create-subscription",
+      "name": "Criar Assinatura",
+      "type": "n8n-nodes-mercadopago-pix-assinatura.paymentMercadoPago",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "paymentMercadoPagoAPI": {
+          "id": "1",
+          "name": "Mercado Pago API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "pending"
+            }
+          ]
+        }
+      },
+      "id": "check-status",
+      "name": "Verificar Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "init-point",
+              "name": "initPoint",
+              "value": "={{ $json.initPoint }}",
+              "type": "string"
+            },
+            {
+              "id": "subscription-id",
+              "name": "subscriptionId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "Assinatura criada com sucesso! Use o init_point para completar o pagamento.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "format-pending-response",
+      "name": "Formatar Resposta (Pending)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "subscription-id",
+              "name": "subscriptionId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "Assinatura criada e ativada com sucesso!",
+              "type": "string"
+            },
+            {
+              "id": "next-payment",
+              "name": "nextPaymentDate",
+              "value": "={{ $json.nextPaymentDate }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "format-authorized-response",
+      "name": "Formatar Resposta (Authorized)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseBody": "={{ $json }}"
+        }
+      },
+      "id": "respond-webhook",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {},
+      "id": "webhook-notification",
+      "name": "Webhook - Notificação Mercado Pago",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 600],
+      "webhookId": "mercadopago-notifications"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.type }}",
+              "value2": "subscription_preapproval"
+            }
+          ]
+        }
+      },
+      "id": "check-notification-type",
+      "name": "Verificar Tipo de Notificação",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 600]
+    },
+    {
+      "parameters": {
+        "resource": "subscriptions",
+        "operation": "get",
+        "subscriptionId": "={{ $json.body.data.id }}"
+      },
+      "id": "get-subscription-details",
+      "name": "Consultar Assinatura",
+      "type": "n8n-nodes-mercadopago-pix-assinatura.paymentMercadoPago",
+      "typeVersion": 1,
+      "position": [650, 500],
+      "credentials": {
+        "paymentMercadoPagoAPI": {
+          "id": "1",
+          "name": "Mercado Pago API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "authorized"
+            }
+          ]
+        }
+      },
+      "id": "check-if-authorized",
+      "name": "Status é Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EMAIL_SERVICE_URL || 'https://seu-servico-email.com/send' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "to",
+              "value": "={{ $json.payerEmail }}"
+            },
+            {
+              "name": "subject",
+              "value": "Assinatura Ativada com Sucesso!"
+            },
+            {
+              "name": "body",
+              "value": "Sua assinatura foi ativada com sucesso! ID: {{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Enviar Email de Confirmação",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 400],
+      "notes": "Opcional: Configure seu serviço de email ou remova este nó"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "resource": "database",
+        "table": "subscriptions",
+        "updateKey": "id",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "status": "={{ $json.status }}",
+            "nextPaymentDate": "={{ $json.nextPaymentDate }}",
+            "updatedAt": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "update-database",
+      "name": "Atualizar Banco de Dados",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.4,
+      "position": [1050, 600],
+      "notes": "Opcional: Configure seu banco de dados ou remova este nó"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-webhook-notification",
+      "name": "Responder Webhook (Notificação)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Criar Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Criar Assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Verificar Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Status": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta (Pending)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Formatar Resposta (Authorized)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta (Pending)": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar Resposta (Authorized)": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Notificação Mercado Pago": {
+      "main": [
+        [
+          {
+            "node": "Verificar Tipo de Notificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Tipo de Notificação": {
+      "main": [
+        [
+          {
+            "node": "Consultar Assinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Assinatura": {
+      "main": [
+        [
+          {
+            "node": "Status é Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status é Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Email de Confirmação",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualizar Banco de Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Email de Confirmação": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook (Notificação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Banco de Dados": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook (Notificação)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-01-01T12:00:00.000Z",
+  "versionId": "1"
+}
+
