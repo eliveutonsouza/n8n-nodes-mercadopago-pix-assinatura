@@ -5,6 +5,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.2.1] - 2024-12-31
+
+### Fixed
+- Melhorado tratamento de erros para parâmetros obrigatórios
+- Mensagens de erro mais claras quando campos obrigatórios não estão preenchidos
+- Captura específica de erros "Bad request - please check your parameters" do n8n
+- Mensagens de erro agora incluem orientações sobre uso de expressões n8n
+
 ## [1.2.0] - 2024-12-31
 
 ### Added
