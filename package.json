@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-mercadopago-flow",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "n8n node para integração completa com a API do Mercado Pago - Pagamentos PIX, Assinaturas, Planos, Webhooks e muito mais (15 recursos disponíveis)",
   "keywords": [
     "n8n",
